@@ -29,8 +29,11 @@ def rootwindow():
     # Give full path name where 
     cwd = os.getcwd()
     path = os.path.join(cwd,"Frames")
-    # path1 = r'C:\\Users\\anant\\Downloads\\Video-Analysis-Using-OpenCV-main\\Video-Analysis-Using-OpenCV-main\\Frames'
-    path1 = r' + path + '
+
+    # Check if the "frames" folder already exists
+    if not os.path.exists(path):
+        # If it doesn't exist, create the "frames" folder
+        os.mkdir(path)
 
     while cap.isOpened():
         frameId = cap.get(1)  # current frame number
@@ -40,29 +43,27 @@ def rootwindow():
         if frameId % math.floor(frameRate) == 0:
             filename = "frame%d.jpg" % count
             count += 1
-            cv2.imwrite(os.path.join(path1, filename), frame)
+            cv2.imwrite(os.path.join(path, filename), frame)
     cap.release()
 
     # Input Image
-    input_image = face_recognition.load_image_file('Elon_Musk_2015.jpg')
+    input_image = face_recognition.load_image_file('saved_img.jpg')
     input_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2RGB)
 
     # Input Image Face Recognition and encoding
     faceLoc = face_recognition.face_locations(input_image)
     encode_input = face_recognition.face_encodings(input_image)
-    for face_Loc in faceLoc:
-        y11, x22, y22, x11 = face_Loc
-        cv2.rectangle(input_image, (x11, y11), (x22, y22), (0, 255, 0), 2)
+    # for face_Loc in faceLoc:
+    #     y11, x22, y22, x11 = face_Loc
+    #     cv2.rectangle(input_image, (x11, y11), (x22, y22), (0, 255, 0), 2)
 
-    # Iterating over Different Frames of video
-    # images = glob.glob(r'C:\Users\visha\Desktop\Mini Project\Frames\*.jpg')
-    # images = glob.glob(r'C:\\Users\\anant\\Downloads\\Video-Analysis-Using-OpenCV-main\\Video-Analysis-Using-OpenCV-main\\Frames\\*.jpg')
-    cwd = os.getcwd()
-    path = os.path.join(cwd,"Frames", '*.jpg')
-    images = glob.glob(r'+ path + ')
+    # List all files in the folder
+    images = os.listdir(path)
+    matches_list = []
     for img in images:
         # Reading Different Frames
-        input_test = face_recognition.load_image_file(img)
+        file_path = os.path.join(path,img)
+        input_test = face_recognition.load_image_file(file_path)
         input_test = cv2.cvtColor(input_test, cv2.COLOR_BGR2RGB)
         # Frames face location recognition and encoding
         face_test = face_recognition.face_locations(input_test)
@@ -75,9 +76,11 @@ def rootwindow():
             if matches[matchIndex]:
                 frames = frames + 1
             if matches[0] == False:
-                # face_detect = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-                face_detect = cv2.CascadeClassifier(r'C:\Users\subha\AppData\Local\Programs\Python310\Lib\site-packages\cv2\data\haarcascade_frontalface_default.xml')
-                face_data = face_detect.detectMultiScale(input_test, 1.3, 5)
+                face_detect = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+                # face_detect = cv2.CascadeClassifier(r'C:\Users\subha\AppData\Local\Programs\Python310\Lib\site-packages\cv2\data\haarcascade_frontalface_default.xml')
+                face_data = face_detect.detectMultiScale(input_test, 
+                                 scaleFactor=1.3, 
+                                 minNeighbors=4)
                 y1, x2, y2, x1 = face_location
                 cv2.rectangle(input_test, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 roi = input_test[y1:y2, x1:x2]
@@ -85,6 +88,8 @@ def rootwindow():
                 input_test[y1:y1 + roi.shape[0], x1:x1 + roi.shape[1]] = roi
                 cv2.imshow("Frame", input_test)
                 cv2.waitKey(0)
+           
+           
     sec = int(frames - 1)
     seconds = "Duration in seconds : " + str(sec)
     dwell = "Video time : " + str(datetime.timedelta(seconds=sec))
@@ -121,7 +126,7 @@ def open_webcam():
                 webcam.release()
                 img_new = cv2.imread('saved_img.jpg', cv2.IMREAD_GRAYSCALE)
                 # img_new = cv2.imshow("Captured Image", img_new)
-                cv2.waitKey(1650)
+                cv2.waitKey(100)
                 cv2.destroyAllWindows()
                 img_ = cv2.imread('saved_img.jpg', cv2.IMREAD_ANYCOLOR)
                 gray = cv2.cvtColor(img_, cv2.COLOR_BGR2GRAY)
@@ -145,8 +150,7 @@ def open_webcam():
 
 # Delete all older frames
 def delete():
-    # directory = r'C:\Users\visha\Desktop\Mini Project/Frames'
-    directory = r'C:\Users\subha\Desktop\Video-Analysis-Using-OpenCV-main\Video-Analysis-Using-OpenCV-main\Frames'
+    directory = r'D:\Video-Analysis-Using-Open-Cv-master\Frames'
     files_in_directory = os.listdir(directory)
     filtered_files = [file for file in files_in_directory if file.endswith(".jpg")]
     for file in filtered_files:
